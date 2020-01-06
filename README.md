@@ -3,8 +3,11 @@ A learning notebook
 
 # Resource
 
-- https://dmitripavlutin.com/javascript-utility-libraries/
-- https://arkwright.github.io/scaling-react-server-side-rendering.html
+- [前端泛读资源文章博客](https://github.com/pomelovico/keep/issues/24)
+
+# Repos
+
+- [有趣的库](https://github.com/pomelovico/keep/issues/25)
 
 # 面经
 - [今日头条前端面试（2018春招）](https://github.com/pomelovico/keep/issues/1)
