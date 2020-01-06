@@ -3,7 +3,13 @@ A learning notebook
 
 # Resource
 
-- [前端泛读资源文章博客](https://github.com/pomelovico/keep/issues/24)
+- [前端泛读资源(文章博客)](https://github.com/pomelovico/keep/issues/24)
+
+### Sites
+- [dev.to](https://dev.to/)
+- [javascriptweekly.com/](https://javascriptweekly.com/)
+- [medium dailyjs](https://medium.com/dailyjs)
+- [fex weekly](http://fex.baidu.com/weekly/)
 
 # Repos
 
