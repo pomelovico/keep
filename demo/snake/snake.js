@@ -52,14 +52,14 @@ class Snake {
 
   _count = 0;
 
+  _timer = 0;
+
+  _cookieTimer = 0;
+
+  _gameOver = false;
+
   constructor() {
-    this._array = Array.from({
-      length: Math.floor(cw / RECT_SIZE),
-    }).map(() => {
-      return Array.from({
-        length: Math.floor(ch / RECT_SIZE),
-      }).map(() => 0);
-    });
+    this.reset();
     this.run();
 
     this.registerKeyBoardEvent();
@@ -82,7 +82,11 @@ class Snake {
   registerKeyBoardEvent() {
     window.addEventListener("keydown", (e) => {
       const direction = DIRECTION_KEYBOARD_MAP[e.keyCode];
-      if (direction && direction !== OPPOSITE[this._direction]) {
+      if (
+        !this._gameOver &&
+        direction &&
+        direction !== OPPOSITE[this._direction]
+      ) {
         this._direction = direction;
         this.move(direction);
       }
@@ -90,8 +94,11 @@ class Snake {
   }
 
   nextFrame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this._snake.forEach(([x, y], index) => {
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+
+    this._snake.forEach(([x, y, fillStyle]) => {
       ctx.beginPath();
       ctx.rect(
         x * PIXEL_RATIO,
@@ -99,28 +106,14 @@ class Snake {
         RECT_SIZE * PIXEL_RATIO,
         RECT_SIZE * PIXEL_RATIO
       );
-
-      const r = Math.floor((255 * index) / this._snake.length);
-      const g = Math.floor((50 * Math.random() * index) % 255);
-      const b = Math.floor(
-        (255 * (this._snake.length - index)) / this._snake.length
-      );
-      ctx.fillStyle = `rgba(${r},${g},${b}, 0.5)`;
+      ctx.fillStyle = fillStyle;
       ctx.fill();
     });
 
+    // cookie
     ctx.fillStyle = "#3370ff";
     const [fx, fy] = this._food;
-    const radius = RECT_SIZE / 2;
     ctx.beginPath();
-    // ctx.arc(
-    //   fx * PIXEL_RATIO + radius,
-    //   fy * PIXEL_RATIO + radius,
-    //   radius * PIXEL_RATIO,
-    //   0,
-    //   Math.PI * 2
-    // );
-    // ctx.fill();
     ctx.drawImage(
       cookie,
       fx * PIXEL_RATIO,
@@ -128,6 +121,8 @@ class Snake {
       RECT_SIZE * PIXEL_RATIO,
       RECT_SIZE * PIXEL_RATIO
     );
+
+    window.requestAnimationFrame(this.nextFrame.bind(this));
   }
 
   move(direction) {
@@ -136,6 +131,9 @@ class Snake {
     const next = [head[0] + delta[0], head[1] + delta[1]];
 
     if (this.selfCollisionCheck(next)) {
+      clearTimeout(this._timer);
+      this._gameOver = true;
+      this.snapshot();
       return;
     }
 
@@ -158,6 +156,7 @@ class Snake {
 
     this._snake.unshift(next);
     if (this.foodCollisionCheck(next)) {
+      clearTimeout(this._cookieTimer);
       this._count += 1;
       countEl.innerText = this._count;
       const nextFood = this.randomFood();
@@ -172,7 +171,15 @@ class Snake {
     }
     this._array[next[0] / RECT_SIZE][next[1] / RECT_SIZE] = 1;
 
-    this.nextFrame();
+    // blink each rect
+    this._snake.forEach((item, index) => {
+      const r = Math.floor((255 * index) / this._snake.length);
+      const g = Math.floor((50 * Math.random() * index) % 255);
+      const b = Math.floor(
+        (255 * (this._snake.length - index)) / this._snake.length
+      );
+      item[2] = `rgba(${r},${g},${b}, 0.5)`;
+    });
   }
 
   randomFood() {
@@ -196,15 +203,68 @@ class Snake {
 
   run() {
     const _run = () => {
+      if (this._gameOver) {
+        return;
+      }
       this.move(this._direction);
-      setTimeout(_run, 100);
+      this._timer = setTimeout(
+        _run,
+        // 每吃5个加速5毫秒
+        Math.max(100 - Math.floor(this._count / 5) * 5, 16)
+      );
     };
     _run();
-  }
-}
 
-function snapshot() {
-  // ctx.
+    window.requestAnimationFrame(this.nextFrame.bind(this));
+  }
+
+  reset() {
+    clearTimeout(this._timer);
+    clearTimeout(this._cookieTimer);
+    this._snake = [
+      [RECT_SIZE * 5, RECT_SIZE * 19],
+      [RECT_SIZE * 4, RECT_SIZE * 19],
+      [RECT_SIZE * 3, RECT_SIZE * 19],
+    ];
+
+    this._direction = "right";
+
+    this._food = [RECT_SIZE * 20, RECT_SIZE * 20];
+
+    this._count = 0;
+
+    this._timer = 0;
+
+    this._gameOver = false;
+
+    this._array = Array.from({
+      length: Math.floor(cw / RECT_SIZE),
+    }).map(() => {
+      return Array.from({
+        length: Math.floor(ch / RECT_SIZE),
+      }).map(() => 0);
+    });
+
+    countEl.innerText = this._count;
+  }
+
+  snapshot() {
+    const src = canvas.toDataURL();
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.width = "300px";
+    img.style.height = "300px";
+    Swal.fire({
+      imageUrl: src,
+      customClass: {
+        image: "snapshot-image",
+      },
+      onClose: () => {
+        this.reset();
+        this.run();
+      },
+    });
+  }
 }
 
 const snake = new Snake();
