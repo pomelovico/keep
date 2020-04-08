@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @font-face {
+      font-family: cartoon;
+      src: url('./FredokaOne-Regular.ttf');
+    }
+    #canvas{
+      width: 400px;
+      height: 400px;
+      /* border: 1px dashed #ccc; */
+      margin: 20px auto;
+      display: block;
+      background-color: #fff;
+      box-shadow: 0 0   20px 4px #dedede ;
+    }
+    #app{
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: #eee;
+    }
+    #cookie{
+      width: 20px;
+    }
+    #statistic{
+      display: flex;
+      align-items: center;
+      white-space: pre;
+      color: #734426;
+      font-size: 16px;
+    }
+    h2{
+      color: #3a4b7b;
+    margin-top: -120px;
+    text-shadow: 2px 2px 0px #bdbdbd;
+    font-size: 28px;
+    }
+    body{
+      margin: 0;
+      padding: 0;
+      background-color: #eee;
+      overflow: hidden;
+      font-family: cartoon;
+    }
+  </style>
+  <title>Snake</title>
+</head>
+<body>
+  <div id="app">
+    <h2>Blink Snake</h2>
+    <p id='statistic'>
+      <img id='cookie' src="./cookie.png" >  x  <span id='count'>0</span>
+    </p>
+    <canvas id="canvas" width="800" height='800' ></canvas>
+  </div>
+  <script src='./snake.js'></script>
+</body>
+</html>
