@@ -10,7 +10,7 @@ const PIXEL_RATIO = window.devicePixelRatio;
 // 方块大小
 const RECT_SIZE = 20;
 canvas.width = cw * PIXEL_RATIO;
-canvas.height = ch * PIXEL_RATIO;
+canvas.height = (ch + 2) * PIXEL_RATIO;
 
 const DIRECTION_KEYBOARD_MAP = {
   37: "left",
@@ -37,6 +37,35 @@ const OPPOSITE = {
   down: "up",
 };
 
+class CookieBar {
+  duration = 3000;
+
+  startTime = null;
+
+  constructor(duration) {
+    this.duration = duration;
+  }
+
+  draw() {
+    if (!this.startTime) {
+      this.startTime = Date.now();
+    }
+    let now = Date.now();
+
+    let percent = 1 - (now - this.startTime) / this.duration;
+
+    ctx.beginPath();
+    ctx.rect(0, ch * PIXEL_RATIO, cw * PIXEL_RATIO, 2 * PIXEL_RATIO);
+    ctx.fillStyle = "#aaa";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(0, ch * PIXEL_RATIO, cw * PIXEL_RATIO * percent, 2 * PIXEL_RATIO);
+    ctx.fillStyle = "#4470ff";
+    ctx.fill();
+  }
+}
+
 class Snake {
   _array = [];
 
@@ -57,6 +86,8 @@ class Snake {
   _cookieTimer = 0;
 
   _gameOver = false;
+
+  _bar = null;
 
   constructor() {
     this.reset();
@@ -93,7 +124,14 @@ class Snake {
     });
   }
 
-  nextFrame() {
+  _lastTimeStamp = null;
+
+  nextFrame(ts) {
+    if (!this._lastTimeStamp) {
+      this._lastTimeStamp = ts;
+    }
+    this._lastTimeStamp = ts;
+
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#fff";
     ctx.fill();
@@ -121,6 +159,8 @@ class Snake {
       RECT_SIZE * PIXEL_RATIO,
       RECT_SIZE * PIXEL_RATIO
     );
+
+    this._bar && this._bar.draw();
 
     window.requestAnimationFrame(this.nextFrame.bind(this));
   }
@@ -159,12 +199,7 @@ class Snake {
       clearTimeout(this._cookieTimer);
       this._count += 1;
       countEl.innerText = this._count;
-      const nextFood = this.randomFood();
-      if (nextFood) {
-        this._food = nextFood;
-      } else {
-        this._food = [-1 * RECT_SIZE, -1 * RECT_SIZE];
-      }
+      this.randomCookie();
     } else {
       const pop = this._snake.pop();
       this._array[pop[0] / RECT_SIZE][pop[1] / RECT_SIZE] = 0;
@@ -182,23 +217,32 @@ class Snake {
     });
   }
 
-  randomFood() {
+  randomCookie() {
     const max = Math.floor((cw / RECT_SIZE) * (ch / RECT_SIZE));
     let startIndex = Math.floor(max * Math.random());
     let count = 0;
+    let food = [-1 * RECT_SIZE, -1 * RECT_SIZE];
     while (count < max) {
       if (this._snake.length >= max) {
-        return null;
+        // return null;
+        break;
       }
       const x = Math.floor(startIndex / (cw / RECT_SIZE));
       const y = startIndex % (cw / RECT_SIZE);
       if (this._array[x][y] !== 1) {
-        return [x * RECT_SIZE, y * RECT_SIZE];
+        food = [x * RECT_SIZE, y * RECT_SIZE];
+        break;
       }
       startIndex += 1;
       count += 1;
     }
-    return null;
+
+    // 随机放置 cookie
+    this._cookieTimer = setTimeout(() => {
+      this.randomCookie();
+    }, 4000);
+    this._food = food;
+    this._bar = new CookieBar(4000);
   }
 
   run() {
@@ -214,7 +258,7 @@ class Snake {
       );
     };
     _run();
-
+    this.randomCookie();
     window.requestAnimationFrame(this.nextFrame.bind(this));
   }
 
