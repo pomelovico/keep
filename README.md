@@ -10,6 +10,7 @@ A learning notebook
 - [javascriptweekly.com/](https://javascriptweekly.com/)
 - [medium dailyjs](https://medium.com/dailyjs)
 - [fex weekly](http://fex.baidu.com/weekly/)
+- [esnextnews](http://esnextnews.com/)
 
 # Repos
 
